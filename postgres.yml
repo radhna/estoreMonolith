@@ -1,0 +1,41 @@
+# PostgreSQL StatefulSet - ConfigMap
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql-db
+spec:
+  serviceName: postgresql-db-service
+  selector:
+    matchLabels:
+      app: postgresql-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgresql-db
+    spec:
+      containers:
+        - name: postgresql-db
+          image: 647240904064.dkr.ecr.us-east-1.amazonaws.com/estore_db_registry:v1
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: postgresql-db-disk
+              mountPath: /data
+          # Config from ConfigMap
+          env:
+          - name:  POSTGRES_DB
+            value: estore
+          - name:  POSTGRES_USER
+            value: estore
+          - name:  POSTGRES_PASSWORD
+            value: testpassword  
+         
+  # Volume Claim
+  volumeClaimTemplates:
+    - metadata:
+        name: postgresql-db-disk
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 25Gi
